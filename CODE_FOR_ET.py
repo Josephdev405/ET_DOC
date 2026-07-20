@@ -32,16 +32,17 @@ two_weeks = today - timedelta(days=18)
 
 
 
-# your coordinates here. Delete the comments # and insert code that looks like this
 
 # replace myCoordinateDictionary with the name of your site, and any time myCoordinateDictionary appears
-# replace that name with the new name.
+# replace myCoordinateDictionary with the new name.
+# make sure to replace the latitude and longitude with your location's latitude and longitude in WGS 84 standard decimal degress
 
-# myCoordinateDictionary = {			
-# "site_id":"NAME_OF_YOUR_LOCATION"
-# "longitude": LONGITUDE_OF_YOUR_LOCATION_IN_DECIMAL_DEGREES_NO_QUOTATION_MARKS!
-# "latitude": LATITUDE_OF_YOUR_LOCATION_IN_DECIMAL_DEGREES_NO_QUOTATION_MARKS!
-# }
+
+myCoordinateDictionary = {			
+	"site_id":"NAME_OF_YOUR_LOCATION_IN_QUOTATION_MARKS",
+	"longitude": LONGITUDE_OF_YOUR_LOCATION_IN_DECIMAL_DEGREES_NO_QUOTATION_MARKS!,
+	"latitude": LATITUDE_OF_YOUR_LOCATION_IN_DECIMAL_DEGREES_NO_QUOTATION_MARKS!
+}
 
 
 
@@ -53,19 +54,20 @@ two_weeks = today - timedelta(days=18)
 # client
 client = MongoClient(connection_string)
 
+# MAKE SURE TO REPLACE WITH YOUR DATABASE NAME AND COLLECTION WHERE IT TELLS YOU TO
+
 # setting up databases and collections
 databases = client.list_database_names() # lists databases in the client cluster
-working_database = client["NAME_OF_YOUR_DATABASE"] # sets the database I will be working on to my experiment database
+working_database = client["NAME_OF_YOUR_DATABASE"] # sets the database you will be working on to the correct database
 openet_collection = working_database["NAME_OF_YOUR_ET_COLLECTION"]
-# collections_list = working_database.list_collection_names()  # lists the collections within my db
-# print(collections_list) # prints
+
 
 
 
 
     
 #####################################################################      OPEN ET         #############################################################
-# set your API key before making the request
+# API KEY, NO CHANGE NECESSARY
 header = {"Authorization": OPEN_ET_API_KEY}
 
 
@@ -74,14 +76,15 @@ header = {"Authorization": OPEN_ET_API_KEY}
 # endpoint arguments
 args = {
 "date_range": [
-    two_weeks.date().isoformat(), # uses input from user
+    two_weeks.date().isoformat(), 
     end_date.date().isoformat()
 ],
-"interval": "daily", # uses input from user
+"interval": "daily", 
 "geometry": [
-    myCoordinateDictionary["longitude"], # SUPER IMPORTANT LONGITUDE, YES LONGITUDE, GOES FIRST THEN LATITUDE this is because computers use x then y, whereas lat then long is acutally y and x
-    myCoordinateDictionary["latitude"]  # 
-], # input can be made for these, but most of this is standard and good already
+    myCoordinateDictionary["longitude"],  
+    myCoordinateDictionary["latitude"]  
+], # YOU CAN CHANGE THESE VARIABLES ACCORDING TO YOUR RESEARCH ON THE openet WEBSITE, USE "PR" FOR PRECIPITATION, AND "NDVI" FOR NDVI, THERE ARE OTHER VARIABLES AND SATELLITES TO CHOOSE FROM
+	# BUT THIS WILL WORK ON ITS OWN
 "model": "Ensemble",
 "variable": "ET",
 "reference_et": "gridMET",
@@ -102,7 +105,7 @@ print(resp.status_code)
 
 
 
-# put this in your code right after the end of your request to openET (probably after data = resp.json() )
+
 # response code error handling
 # THIS CODE TELLS YOU WHAT WENT WRONG IF SOMETHING DID
 
@@ -135,7 +138,7 @@ if len(data) == 0:
 
 
 
-# update and insert to mongo db
+# updating and inserting to mongo db
 for record in data:
 
     timestamp = datetime.strptime(
@@ -146,14 +149,14 @@ for record in data:
     document = {
 
         "timestamp": timestamp,
-
+		# remember to replace myCoordinateDictionary with the right name!
         "metadata": {
             "site_id": myCoordinateDictionary["site_id"],
             "latitude": myCoordinateDictionary["latitude"],
             "longitude": myCoordinateDictionary["longitude"]
         },
 
-        "et_mm": record["et"]
+        "et_mm": record["et"] # IF YOU USED PR OR NDVI OR ANY OTHER VARIABLE, CHANGE THIS TO REFLECT THAT
 
     }
 
