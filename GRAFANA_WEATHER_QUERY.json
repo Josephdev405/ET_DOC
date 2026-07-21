@@ -1,0 +1,31 @@
+
+[
+
+  {
+    "$addFields": {
+      "time": {
+        "$dateFromString": {
+          "dateString": "$date"
+        }
+      }
+    }
+  },
+
+    {
+    "$match": {
+      "time": {
+      "$gte": { "$date": { "$numberLong": "$__from" } },
+      "$lt": { "$date": { "$numberLong": "$__to" } }
+      }
+    
+    }
+  },
+
+  {
+    "$project": {
+      "_id":0
+      
+ 
+    }
+  }
+]
